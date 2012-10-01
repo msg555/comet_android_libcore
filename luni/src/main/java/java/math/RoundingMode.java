@@ -1,122 +1,359 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ * %W% %E%
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Copyright (c) 2006, Oracle and/or its affiliates. All rights reserved.
+ * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
 
+/*
+ * @(#)RoundingMode.java  1.x 01/xx/xx
+ *
+ * Copyright (c) 2001, Oracle and/or its affiliates. All rights reserved.
+ * Portions Copyright IBM Corporation, 2001. All Rights Reserved.
+ *
+ * This software is the proprietary information of Oracle.
+ * Use is subject to license terms.
+ *
+ */
 package java.math;
 
 /**
- * Specifies the rounding behavior for operations whose results cannot be
- * represented exactly.
+ * Specifies a <i>rounding behavior</i> for numerical operations
+ * capable of discarding precision. Each rounding mode indicates how
+ * the least significant returned digit of a rounded result is to be
+ * calculated.  If fewer digits are returned than the digits needed to
+ * represent the exact numerical result, the discarded digits will be
+ * referred to as the <i>discarded fraction</i> regardless the digits'
+ * contribution to the value of the number.  In other words,
+ * considered as a numerical value, the discarded fraction could have
+ * an absolute value greater than one.
+ *
+ * <p>Each rounding mode description includes a table listing how
+ * different two-digit decimal values would round to a one digit
+ * decimal value under the rounding mode in question.  The result
+ * column in the tables could be gotten by creating a
+ * <tt>BigDecimal</tt> number with the specified value, forming a
+ * {@link MathContext} object with the proper settings
+ * (<tt>precision</tt> set to <tt>1</tt>, and the
+ * <tt>roundingMode</tt> set to the rounding mode in question), and
+ * calling {@link BigDecimal#round round} on this number with the
+ * proper <tt>MathContext</tt>.  A summary table showing the results
+ * of these rounding operations for all rounding modes appears below.
+ *
+ *<p>
+ *<table border>
+ * <caption top><h3>Summary of Rounding Operations Under Different Rounding
+ * Modes</h3></caption>
+ * <tr><th></th><th colspan=8>Result of rounding input to one digit with the
+ * given 
+ *                           rounding mode</th>
+ * <tr valign=top>
+ * <th>Input Number</th>     <th><tt>UP</tt></th> 
+ *                                           <th><tt>DOWN</tt></th> 
+ *                                                        <th><tt>CEILING</tt></th>
+ *                                                                       <th><tt>FLOOR</tt></th>
+ *                                                                                    <th><tt>HALF_UP</tt></th>
+ *                                                                                                   <th><tt>HALF_DOWN</tt></th>
+ *                                                                                                                    <th><tt>HALF_EVEN</tt></th>
+ *                                                                                                                                     <th><tt>UNNECESSARY</tt></th>
+ *    
+ * <tr align=right><td>5.5</td>  <td>6</td>  <td>5</td>    <td>6</td>
+ * <td>5</td>  <td>6</td>      <td>5</td>       <td>6</td>       <td>throw
+ * <tt>ArithmeticException</tt></td>
+ * <tr align=right><td>2.5</td>  <td>3</td>  <td>2</td>    <td>3</td>
+ * <td>2</td>  <td>3</td>      <td>2</td>       <td>2</td>       <td>throw
+ * <tt>ArithmeticException</tt></td>
+ * <tr align=right><td>1.6</td>  <td>2</td>  <td>1</td>    <td>2</td>
+ * <td>1</td>  <td>2</td>      <td>2</td>       <td>2</td>       <td>throw
+ * <tt>ArithmeticException</tt></td>
+ * <tr align=right><td>1.1</td>  <td>2</td>  <td>1</td>    <td>2</td>
+ * <td>1</td>  <td>1</td>      <td>1</td>       <td>1</td>       <td>throw
+ * <tt>ArithmeticException</tt></td>
+ * <tr align=right><td>1.0</td>  <td>1</td>  <td>1</td>    <td>1</td>
+ * <td>1</td>  <td>1</td>      <td>1</td>       <td>1</td>       <td>1</td>                                
+ * <tr align=right><td>-1.0</td> <td>-1</td> <td>-1</td>   <td>-1</td>
+ * <td>-1</td> <td>-1</td>     <td>-1</td>      <td>-1</td>      <td>-1</td>                               
+ * <tr align=right><td>-1.1</td> <td>-2</td> <td>-1</td>   <td>-1</td>
+ * <td>-2</td> <td>-1</td>     <td>-1</td>      <td>-1</td>      <td>throw
+ * <tt>ArithmeticException</tt></td>
+ * <tr align=right><td>-1.6</td> <td>-2</td> <td>-1</td>   <td>-1</td>
+ * <td>-2</td> <td>-2</td>     <td>-2</td>      <td>-2</td>      <td>throw
+ * <tt>ArithmeticException</tt></td>
+ * <tr align=right><td>-2.5</td> <td>-3</td> <td>-2</td>   <td>-2</td>
+ * <td>-3</td> <td>-3</td>     <td>-2</td>      <td>-2</td>      <td>throw
+ * <tt>ArithmeticException</tt></td>
+ * <tr align=right><td>-5.5</td> <td>-6</td> <td>-5</td>   <td>-5</td>
+ * <td>-6</td> <td>-6</td>     <td>-5</td>      <td>-6</td>      <td>throw
+ * <tt>ArithmeticException</tt></td>
+ *</table>
+ *
+ * 
+ * <p>This <tt>enum</tt> is intended to replace the integer-based
+ * enumeration of rounding mode constants in {@link BigDecimal}
+ * ({@link BigDecimal#ROUND_UP}, {@link BigDecimal#ROUND_DOWN},
+ * etc. ).
+ *
+ * @see     BigDecimal
+ * @see     MathContext
+ * @version 1.x 01/xx/xx
+ * @author  Josh Bloch
+ * @author  Mike Cowlishaw
+ * @author  Joseph D. Darcy
+ * @since 1.5
  */
 public enum RoundingMode {
 
     /**
-     * Rounding mode where positive values are rounded towards positive infinity
-     * and negative values towards negative infinity.
-     * <br>
-     * Rule: {@code x.round().abs() >= x.abs()}
+     * Rounding mode to round away from zero.  Always increments the
+     * digit prior to a non-zero discarded fraction.  Note that this
+     * rounding mode never decreases the magnitude of the calculated
+     * value.
+     *
+     *<p>Example:
+     *<table border>
+     *<tr valign=top><th>Input Number</th>
+     *    <th>Input rounded to one digit<br> with <tt>UP</tt> rounding
+     *<tr align=right><td>5.5</td>  <td>6</td>
+     *<tr align=right><td>2.5</td>  <td>3</td>
+     *<tr align=right><td>1.6</td>  <td>2</td>
+     *<tr align=right><td>1.1</td>  <td>2</td>
+     *<tr align=right><td>1.0</td>  <td>1</td>
+     *<tr align=right><td>-1.0</td> <td>-1</td>
+     *<tr align=right><td>-1.1</td> <td>-2</td>
+     *<tr align=right><td>-1.6</td> <td>-2</td>
+     *<tr align=right><td>-2.5</td> <td>-3</td>
+     *<tr align=right><td>-5.5</td> <td>-6</td>
+     *</table>
      */
     UP(BigDecimal.ROUND_UP),
-
+        
     /**
-     * Rounding mode where the values are rounded towards zero.
-     * <br>
-     * Rule: {@code x.round().abs() <= x.abs()}
+     * Rounding mode to round towards zero.  Never increments the digit
+     * prior to a discarded fraction (i.e., truncates).  Note that this
+     * rounding mode never increases the magnitude of the calculated value.
+     *
+     *<p>Example:
+     *<table border>
+     *<tr valign=top><th>Input Number</th>
+     *    <th>Input rounded to one digit<br> with <tt>DOWN</tt> rounding
+     *<tr align=right><td>5.5</td>  <td>5</td>
+     *<tr align=right><td>2.5</td>  <td>2</td>
+     *<tr align=right><td>1.6</td>  <td>1</td>
+     *<tr align=right><td>1.1</td>  <td>1</td>
+     *<tr align=right><td>1.0</td>  <td>1</td>
+     *<tr align=right><td>-1.0</td> <td>-1</td>
+     *<tr align=right><td>-1.1</td> <td>-1</td>
+     *<tr align=right><td>-1.6</td> <td>-1</td>
+     *<tr align=right><td>-2.5</td> <td>-2</td>
+     *<tr align=right><td>-5.5</td> <td>-5</td>
+     *</table>
      */
     DOWN(BigDecimal.ROUND_DOWN),
-
+        
     /**
-     * Rounding mode to round towards positive infinity. For positive values
-     * this rounding mode behaves as {@link #UP}, for negative values as
-     * {@link #DOWN}.
-     * <br>
-     * Rule: {@code x.round() >= x}
+     * Rounding mode to round towards positive infinity.  If the
+     * result is positive, behaves as for <tt>RoundingMode.UP</tt>;
+     * if negative, behaves as for <tt>RoundingMode.DOWN</tt>.  Note
+     * that this rounding mode never decreases the calculated value.
+     *
+     *<p>Example:
+     *<table border>
+     *<tr valign=top><th>Input Number</th>
+     *    <th>Input rounded to one digit<br> with <tt>CEILING</tt> rounding
+     *<tr align=right><td>5.5</td>  <td>6</td>
+     *<tr align=right><td>2.5</td>  <td>3</td>
+     *<tr align=right><td>1.6</td>  <td>2</td>
+     *<tr align=right><td>1.1</td>  <td>2</td>
+     *<tr align=right><td>1.0</td>  <td>1</td>
+     *<tr align=right><td>-1.0</td> <td>-1</td>
+     *<tr align=right><td>-1.1</td> <td>-1</td>
+     *<tr align=right><td>-1.6</td> <td>-1</td>
+     *<tr align=right><td>-2.5</td> <td>-2</td>
+     *<tr align=right><td>-5.5</td> <td>-5</td>
+     *</table>
      */
     CEILING(BigDecimal.ROUND_CEILING),
 
     /**
-     * Rounding mode to round towards negative infinity. For positive values
-     * this rounding mode behaves as {@link #DOWN}, for negative values as
-     * {@link #UP}.
-     * <br>
-     * Rule: {@code x.round() <= x}
+     * Rounding mode to round towards negative infinity.  If the
+     * result is positive, behave as for <tt>RoundingMode.DOWN</tt>;
+     * if negative, behave as for <tt>RoundingMode.UP</tt>.  Note that
+     * this rounding mode never increases the calculated value.
+     *
+     *<p>Example:
+     *<table border>
+     *<tr valign=top><th>Input Number</th>
+     *    <th>Input rounded to one digit<br> with <tt>FLOOR</tt> rounding
+     *<tr align=right><td>5.5</td>  <td>5</td>
+     *<tr align=right><td>2.5</td>  <td>2</td>
+     *<tr align=right><td>1.6</td>  <td>1</td>
+     *<tr align=right><td>1.1</td>  <td>1</td>
+     *<tr align=right><td>1.0</td>  <td>1</td>
+     *<tr align=right><td>-1.0</td> <td>-1</td>
+     *<tr align=right><td>-1.1</td> <td>-2</td>
+     *<tr align=right><td>-1.6</td> <td>-2</td>
+     *<tr align=right><td>-2.5</td> <td>-3</td>
+     *<tr align=right><td>-5.5</td> <td>-6</td>
+     *</table>
      */
     FLOOR(BigDecimal.ROUND_FLOOR),
 
     /**
-     * Rounding mode where values are rounded towards the nearest neighbor. Ties
-     * are broken by rounding up.
+     * Rounding mode to round towards &quot;nearest neighbor&quot;
+     * unless both neighbors are equidistant, in which case round up.
+     * Behaves as for <tt>RoundingMode.UP</tt> if the discarded
+     * fraction is &gt;= 0.5; otherwise, behaves as for
+     * <tt>RoundingMode.DOWN</tt>.  Note that this is the rounding
+     * mode commonly taught at school.
+     *
+     *<p>Example:
+     *<table border>
+     *<tr valign=top><th>Input Number</th>
+     *    <th>Input rounded to one digit<br> with <tt>HALF_UP</tt> rounding
+     *<tr align=right><td>5.5</td>  <td>6</td>
+     *<tr align=right><td>2.5</td>  <td>3</td>
+     *<tr align=right><td>1.6</td>  <td>2</td>
+     *<tr align=right><td>1.1</td>  <td>1</td>
+     *<tr align=right><td>1.0</td>  <td>1</td>
+     *<tr align=right><td>-1.0</td> <td>-1</td>
+     *<tr align=right><td>-1.1</td> <td>-1</td>
+     *<tr align=right><td>-1.6</td> <td>-2</td>
+     *<tr align=right><td>-2.5</td> <td>-3</td>
+     *<tr align=right><td>-5.5</td> <td>-6</td>
+     *</table>
      */
     HALF_UP(BigDecimal.ROUND_HALF_UP),
 
     /**
-     * Rounding mode where values are rounded towards the nearest neighbor. Ties
-     * are broken by rounding down.
+     * Rounding mode to round towards &quot;nearest neighbor&quot;
+     * unless both neighbors are equidistant, in which case round
+     * down.  Behaves as for <tt>RoundingMode.UP</tt> if the discarded
+     * fraction is &gt; 0.5; otherwise, behaves as for
+     * <tt>RoundingMode.DOWN</tt>.
+     *
+     *<p>Example:
+     *<table border>
+     *<tr valign=top><th>Input Number</th>
+     *    <th>Input rounded to one digit<br> with <tt>HALF_DOWN</tt> rounding
+     *<tr align=right><td>5.5</td>  <td>5</td>
+     *<tr align=right><td>2.5</td>  <td>2</td>
+     *<tr align=right><td>1.6</td>  <td>2</td>
+     *<tr align=right><td>1.1</td>  <td>1</td>
+     *<tr align=right><td>1.0</td>  <td>1</td>
+     *<tr align=right><td>-1.0</td> <td>-1</td>
+     *<tr align=right><td>-1.1</td> <td>-1</td>
+     *<tr align=right><td>-1.6</td> <td>-2</td>
+     *<tr align=right><td>-2.5</td> <td>-2</td>
+     *<tr align=right><td>-5.5</td> <td>-5</td>
+     *</table>
      */
     HALF_DOWN(BigDecimal.ROUND_HALF_DOWN),
 
     /**
-     * Rounding mode where values are rounded towards the nearest neighbor. Ties
-     * are broken by rounding to the even neighbor.
+     * Rounding mode to round towards the &quot;nearest neighbor&quot;
+     * unless both neighbors are equidistant, in which case, round
+     * towards the even neighbor.  Behaves as for
+     * <tt>RoundingMode.HALF_UP</tt> if the digit to the left of the
+     * discarded fraction is odd; behaves as for
+     * <tt>RoundingMode.HALF_DOWN</tt> if it's even.  Note that this
+     * is the rounding mode that statistically minimizes cumulative
+     * error when applied repeatedly over a sequence of calculations.
+     * It is sometimes known as &quot;Banker's rounding,&quot; and is
+     * chiefly used in the USA.  This rounding mode is analogous to
+     * the rounding policy used for <tt>float</tt> and <tt>double</tt>
+     * arithmetic in Java.
+     *
+     *<p>Example:
+     *<table border>
+     *<tr valign=top><th>Input Number</th>
+     *    <th>Input rounded to one digit<br> with <tt>HALF_EVEN</tt> rounding
+     *<tr align=right><td>5.5</td>  <td>6</td>
+     *<tr align=right><td>2.5</td>  <td>2</td>
+     *<tr align=right><td>1.6</td>  <td>2</td>
+     *<tr align=right><td>1.1</td>  <td>1</td>
+     *<tr align=right><td>1.0</td>  <td>1</td>
+     *<tr align=right><td>-1.0</td> <td>-1</td>
+     *<tr align=right><td>-1.1</td> <td>-1</td>
+     *<tr align=right><td>-1.6</td> <td>-2</td>
+     *<tr align=right><td>-2.5</td> <td>-2</td>
+     *<tr align=right><td>-5.5</td> <td>-6</td>
+     *</table>
      */
     HALF_EVEN(BigDecimal.ROUND_HALF_EVEN),
 
     /**
-     * Rounding mode where the rounding operations throws an ArithmeticException
-     * for the case that rounding is necessary, i.e. for the case that the value
-     * cannot be represented exactly.
+     * Rounding mode to assert that the requested operation has an exact
+     * result, hence no rounding is necessary.  If this rounding mode is
+     * specified on an operation that yields an inexact result, an
+     * <tt>ArithmeticException</tt> is thrown.
+     *<p>Example:
+     *<table border>
+     *<tr valign=top><th>Input Number</th>
+     *    <th>Input rounded to one digit<br> with <tt>UNNECESSARY</tt> rounding
+     *<tr align=right><td>5.5</td>  <td>throw <tt>ArithmeticException</tt></td>
+     *<tr align=right><td>2.5</td>  <td>throw <tt>ArithmeticException</tt></td>
+     *<tr align=right><td>1.6</td>  <td>throw <tt>ArithmeticException</tt></td>
+     *<tr align=right><td>1.1</td>  <td>throw <tt>ArithmeticException</tt></td>
+     *<tr align=right><td>1.0</td>  <td>1</td>
+     *<tr align=right><td>-1.0</td> <td>-1</td>
+     *<tr align=right><td>-1.1</td> <td>throw <tt>ArithmeticException</tt></td>
+     *<tr align=right><td>-1.6</td> <td>throw <tt>ArithmeticException</tt></td>
+     *<tr align=right><td>-2.5</td> <td>throw <tt>ArithmeticException</tt></td>
+     *<tr align=right><td>-5.5</td> <td>throw <tt>ArithmeticException</tt></td> 
+     *</table>
      */
     UNNECESSARY(BigDecimal.ROUND_UNNECESSARY);
 
-    /** The old constant of <code>BigDecimal</code>. */
-    private final int bigDecimalRM;
+    // Corresponding BigDecimal rounding constant
+    final int oldMode;
 
-    /** It sets the old constant. */
-    RoundingMode(int rm) {
-        bigDecimalRM = rm;
+    /**
+     * Constructor
+     *
+     * @param oldMode The <tt>BigDecimal</tt> constant corresponding to 
+     *        this mode
+     */
+    private RoundingMode(int oldMode) {
+        this.oldMode = oldMode;
     }
 
     /**
-     * Converts rounding mode constants from class {@code BigDecimal} into
-     * {@code RoundingMode} values.
+     * Returns the <tt>RoundingMode</tt> object corresponding to a
+     * legacy integer rounding mode constant in {@link BigDecimal}.
      *
-     * @param mode
-     *            rounding mode constant as defined in class {@code BigDecimal}
-     * @return corresponding rounding mode object
+     * @param  rm legacy integer rounding mode to convert
+     * @return <tt>RoundingMode</tt> corresponding to the given integer.
+     * @throws IllegalArgumentException integer is out of range
      */
-    public static RoundingMode valueOf(int mode) {
-        switch (mode) {
-            case BigDecimal.ROUND_CEILING:
-                return CEILING;
-            case BigDecimal.ROUND_DOWN:
-                return DOWN;
-            case BigDecimal.ROUND_FLOOR:
-                return FLOOR;
-            case BigDecimal.ROUND_HALF_DOWN:
-                return HALF_DOWN;
-            case BigDecimal.ROUND_HALF_EVEN:
-                return HALF_EVEN;
-            case BigDecimal.ROUND_HALF_UP:
-                return HALF_UP;
-            case BigDecimal.ROUND_UNNECESSARY:
-                return UNNECESSARY;
-            case BigDecimal.ROUND_UP:
-                return UP;
-            default:
-                throw new IllegalArgumentException("Invalid rounding mode");
-        }
+    public static RoundingMode valueOf(int rm) {
+    switch(rm) {
+
+    case BigDecimal.ROUND_UP:
+        return UP;
+
+    case BigDecimal.ROUND_DOWN:
+        return DOWN;
+
+    case BigDecimal.ROUND_CEILING:
+        return CEILING;
+        
+    case BigDecimal.ROUND_FLOOR:
+        return FLOOR;
+
+    case BigDecimal.ROUND_HALF_UP:
+        return HALF_UP;
+        
+    case BigDecimal.ROUND_HALF_DOWN:
+        return HALF_DOWN;
+        
+    case BigDecimal.ROUND_HALF_EVEN:
+        return HALF_EVEN;
+        
+    case BigDecimal.ROUND_UNNECESSARY:
+        return UNNECESSARY;
+        
+    default:
+        throw new IllegalArgumentException("argument out of range");        
+    }
     }
 }
